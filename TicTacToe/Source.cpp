@@ -1,37 +1,31 @@
 #include <iostream>
 #include <string>
 
-int turn = 1;
-char mark{};
-int turnCounter{ 0 };
+int turn = 1; // Used to decide whose player's turn it
+char mark{}; // Used for controlling which space the players want to mark
+int turnCounter = 0; // For the turn counter
 
 // Array that makes up the board
 const int row = 3;
 const int col = 3;
 char board[row][col] = { {'1', '2', '3'},
-								{'4', '5', '6'},
-							    {'7', '8', '9'}};
+				         {'4', '5', '6'},
+						 {'7', '8', '9'} };
 
 void drawBoard();
-void playing();
+void gaming();
 void checkingWin();
-void clearCin();
+void tie();
 void whoWon();
 void quit();
-int victory = false;
+void resetting();
+void clearCin();
 
 int main() {
 	std::cout << "------------ Welcome to TicTacToe ------------" << std::endl << std::endl;
 	drawBoard();
-	do {
-		if (turn == 1) {
-			playing();
-			drawBoard();
-			turn = turn + 1;
-		}
-		checkingWin();
-	} while (victory == 0);
-	whoWon();
+	gaming();
+
 }
 
 void drawBoard() {  // This function draws the board and places numbers in the boxes
@@ -45,9 +39,9 @@ void drawBoard() {  // This function draws the board and places numbers in the b
 }
 
 // This is player 1 turn
-void playing() {
-
-	while (turnCounter < 9) {
+void gaming() {
+	drawBoard();
+	while (turnCounter <= 9) {
 		if (turn == 1) {
 			std::cout << "Player One: Select the slot you want to insert an 'X'" << std::endl;
 		}
@@ -57,75 +51,77 @@ void playing() {
 		int u{};
 		int v{};
 		mark = 0;
-		//clearCin();
 		std::cin >> mark;
+		clearCin();
 		for (int u = 0; u < row; u++) {
 			for (int v = 0; v < col; v++) {
 				if (mark == board[u][v]) {  // If the symbols you try to input match i.e numbers, they will be overwritten by X or O
 					if (turn == 1) {
-						if (mark != board[u][v]) {
+						if (board[u][v] == 'X' || board[u][v] == 'O') {
 							std::cout << "select a free slot." << std::endl;
-							playing();
+							gaming();
 						}
 						board[u][v] = 'X';
 						drawBoard();
+						turn = turn + 1;
 					}
 					else if (turn == 2) {
+						if (board[u][v] == 'X' || board[u][v] == 'O') {
+							std::cout << "select a free slot." << std::endl;
+							gaming();
+						}
 						board[u][v] = 'O';
 						drawBoard();
+						turn = turn - 1;
 					}
 				}
 
 			}
 		}
+		checkingWin();
 		turnCounter++;
-	}
-	//if (board[u][v] != 'X' || board[u][v] != 'O') { // This is supposed to make it impossible to place a symbol on a used slot
-		//for (int i{}; i < mark; i++) {			    // This for loop finds the correct slot when you input a number
-		//	if (i % 3 == 0 && i > 0) {		        // i is a variable responsible for finding the correct x-axis
-		//		j++;
-		//	}
-		//}
-		/*if (turn == 1) {
-			board[j][(mark - 1) % 3] = 'X';
-			turn = turn + 1;
-			table();
-		}
-		else if (turn == 2) {
-			board[j][(mark - 1) % 3] = 'O';
-			turn = turn - 1;
-			table();
-		}*/	//}		
+	} // When turnCounter reaches 9 the while loop will be broken and it will reach the tie function
+	tie();
 }
-
-
-
-
 
 void checkingWin() { // Checks if slot next to eachother in a line has the same value/symbol. If they are Win
 	if (board[0][0] == board[0][1] && board[0][1] == board[0][2]) {
-		victory = 1;
+		whoWon();
 	}
 	else if (board[1][0] == board[1][1] && board[1][1] == board[1][2]) {
-		victory = 1;
+		whoWon();
 	}
 	else if (board[2][0] == board[2][1] && board[2][1] == board[2][2]) {
-		victory = 1;
+		whoWon();
 	}
 	else if (board[0][0] == board[1][0] && board[1][0] == board[2][0]) {
-		victory = 1;
+		whoWon();
 	}
 	else if (board[1][0] == board[1][1] && board[1][1] == board[1][2]) {
-		victory = 1;
+		whoWon();
 	}
 	else if (board[2][0] == board[2][1] && board[2][1] == board[2][2]) {
-		victory = 1;
+		whoWon();
 	}
 	else if (board[0][0] == board[1][1] && board[1][1] == board[2][2]) {
-		victory = 1;
+		whoWon();
 	}
 	else if (board[0][2] == board[1][1] && board[1][1] == board[2][0]) {
-		victory = 1;
+		whoWon();
+	}
+}
+
+void tie() {
+	char yesNo{};
+	std::cout << "It seems we have reached a tie." << std::endl;
+	std::cout << "Would you like to play again? y/n";
+	std::cin >> yesNo;
+	yesNo = tolower(yesNo);
+	if (yesNo == 'y') {
+		resetting();
+	}
+	else if (yesNo == 'n') {
+		exit(0);
 	}
 }
 
@@ -140,23 +136,31 @@ void whoWon() {
 	std::cout << "Do you want to play again? y/n";
 	std::cin >> yesNo;
 	if (yesNo == 'y') {
-		main();
+		resetting();
 	}
 	else if (yesNo == 'n') {
 		exit (0);
 	}
 }
 
-void quit() {
-	char YN;
-	std::cout << "Are you sure you want to quit? y/n";
-	std::cin >> YN;
-	if (YN == 'y' || YN == 'Y') {
-		exit (0);
+void resetting() {
+	char resetBoard[3][3] = { {'1','2','3'},
+							  {'4','5','6'},
+						      {'7','8','9'} };
+	for (int i = 0; i < row; i++) {
+		for (int j = 0; j < col; j++) {
+			board[i][j] = resetBoard[i][j];
+			std::cout << board[i][j];
+		}
 	}
+	turn = 1;
+	turnCounter = 0;
+
+
+	gaming();
 }
 
 void clearCin() {
+	std::cin.clear();
 	std::cin.ignore(32767, '\n');
-	std::cin.get();
 }
